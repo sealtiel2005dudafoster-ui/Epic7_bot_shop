@@ -36,10 +36,13 @@ _OCR_CHAR_FIXES = {
 
 
 def _preprocess_for_ocr(img: np.ndarray) -> np.ndarray:
-    """Preprocess image for better OCR on price text."""
+    """Preprocess image for better OCR on price text.
+    Handles both dark-on-light and light-on-dark backgrounds automatically.
+    ponytail: invert+OTSU para fundo escuro; upgrade: adaptive threshold + morph.
+    """
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img.copy()
 
-    # Upscale 2x for better OCR accuracy
+    # Upscale for better OCR accuracy
     h, w = gray.shape
     if w < 100:
         gray = cv2.resize(gray, (w * 3, h * 3), interpolation=cv2.INTER_CUBIC)
@@ -49,7 +52,12 @@ def _preprocess_for_ocr(img: np.ndarray) -> np.ndarray:
     # Noise removal
     gray = cv2.fastNlMeansDenoising(gray)
 
-    # Binarize — try both normal and inverse to handle dark-on-light or light-on-dark
+    # Detect if background is dark: if median brightness < 128, invert so text is black-on-white
+    median_brightness = np.median(gray)
+    if median_brightness < 128:
+        gray = cv2.bitwise_not(gray)
+
+    # Binarize
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     return thresh
@@ -62,7 +70,7 @@ def _clean_price_text(text: str) -> str:
 
 def extract_price_with_confidence(
     img: np.ndarray,
-    tesseract_config: str = "--psm 7 --oem 3",
+    tesseract_config: str = "--psm 6 --oem 3",
 ) -> tuple[int | None, float]:
     """
     Extract a gold price from an image ROI and return a confidence score.
@@ -71,33 +79,46 @@ def extract_price_with_confidence(
       - price is the parsed integer, or None if parsing fails.
       - confidence (0.0–1.0) measures how much of the OCR text looks numeric.
 
-    Accepts formats like "18,000", "184000", "2 800", etc.
+    Accepts formats like "18,000", "184000", "280,000" etc.
+    ponytail: PSM6 para frames multi-linha; upgrade: fallback PSM7 se ROI for narrow.
     """
     if not _HAS_PYTESSERACT:
         raise RuntimeError("pytesseract not installed. Install with: pip install pytesseract")
 
     processed = _preprocess_for_ocr(img)
     raw_text = pytesseract.image_to_string(processed, config=tesseract_config)
-    cleaned = _clean_price_text(raw_text.strip())
+    cleaned = raw_text.strip()
 
-    # Confidence = how much of the OCR text looks like a number
-    digits = re.sub(r"[^\d]", "", cleaned)
-    total_chars = len(cleaned.replace(" ", ""))
+    # Strategy 1: match comma-separated number pattern (e.g. "280,000", "18,000")
+    m = re.search(r"(\d{1,3}(?:,\d{3})+)", cleaned)
+    if m:
+        price_str = m.group(1).replace(",", "")
+        try:
+            return int(price_str), 0.95
+        except ValueError:
+            pass
 
-    if total_chars == 0:
-        return None, 0.0
+    # Strategy 2: match a plain large number (e.g. "280000")
+    m = re.search(r"(\d{5,})", cleaned)
+    if m:
+        try:
+            return int(m.group(1)), 0.85
+        except ValueError:
+            pass
 
-    confidence = len(digits) / total_chars
+    # Strategy 3: apply char fixes then strip to digits (fallback, less reliable)
+    fixed = _clean_price_text(cleaned)
+    digits = re.sub(r"[^\d]", "", fixed)
+    if digits and len(digits) >= 4:
+        try:
+            return int(digits), 0.6
+        except ValueError:
+            pass
 
-    try:
-        price = int(digits) if digits else None
-    except ValueError:
-        price = None
-
-    return price, round(confidence, 3)
+    return None, 0.0
 
 
-def extract_price(img: np.ndarray, tesseract_config: str = "--psm 7 --oem 3") -> int | None:
+def extract_price(img: np.ndarray, tesseract_config: str = "--psm 6 --oem 3") -> int | None:
     """
     Extract a gold price from an image ROI.
 
