@@ -70,7 +70,7 @@ def _clean_price_text(text: str) -> str:
 
 def extract_price_with_confidence(
     img: np.ndarray,
-    tesseract_config: str = "--psm 6 --oem 3",
+    tesseract_config: str = "--psm 7 --oem 3",
 ) -> tuple[int | None, float]:
     """
     Extract a gold price from an image ROI and return a confidence score.
@@ -80,40 +80,53 @@ def extract_price_with_confidence(
       - confidence (0.0–1.0) measures how much of the OCR text looks numeric.
 
     Accepts formats like "18,000", "184000", "280,000" etc.
-    ponytail: PSM6 para frames multi-linha; upgrade: fallback PSM7 se ROI for narrow.
+    ponytail: PSM7 default (rápido para ROIs estreitas); fallback PSM6 se ROI >100px altura.
     """
     if not _HAS_PYTESSERACT:
         raise RuntimeError("pytesseract not installed. Install with: pip install pytesseract")
 
     processed = _preprocess_for_ocr(img)
-    raw_text = pytesseract.image_to_string(processed, config=tesseract_config)
-    cleaned = raw_text.strip()
 
-    # Strategy 1: match comma-separated number pattern (e.g. "280,000", "18,000")
-    m = re.search(r"(\d{1,3}(?:,\d{3})+)", cleaned)
-    if m:
-        price_str = m.group(1).replace(",", "")
-        try:
-            return int(price_str), 0.95
-        except ValueError:
-            pass
+    # Choose PSM based on ROI height: narrow ROI → PSM7 (single line, fast)
+    # wide ROI → PSM6 (block of text, slower but more accurate for multi-line)
+    h = img.shape[0]
+    if h > 100:
+        configs = ["--psm 6 --oem 3", "--psm 7 --oem 3"]
+    else:
+        configs = ["--psm 7 --oem 3"]
 
-    # Strategy 2: match a plain large number (e.g. "280000")
-    m = re.search(r"(\d{5,})", cleaned)
-    if m:
-        try:
-            return int(m.group(1)), 0.85
-        except ValueError:
-            pass
+    for cfg in configs:
+        raw_text = pytesseract.image_to_string(processed, config=cfg)
+        cleaned = raw_text.strip()
+
+        # Strategy 1: match comma-separated number pattern (e.g. "280,000", "18,000")
+        m = re.search(r"(\d{1,3}(?:,\d{3})+)", cleaned)
+        if m:
+            price_str = m.group(1).replace(",", "")
+            try:
+                return int(price_str), 0.95
+            except ValueError:
+                pass
+
+        # Strategy 2: match a plain large number (e.g. "280000")
+        m = re.search(r"(\d{5,})", cleaned)
+        if m:
+            try:
+                return int(m.group(1)), 0.85
+            except ValueError:
+                pass
 
     # Strategy 3: apply char fixes then strip to digits (fallback, less reliable)
-    fixed = _clean_price_text(cleaned)
-    digits = re.sub(r"[^\d]", "", fixed)
-    if digits and len(digits) >= 4:
-        try:
-            return int(digits), 0.6
-        except ValueError:
-            pass
+    for cfg in configs:
+        raw_text = pytesseract.image_to_string(processed, config=cfg)
+        cleaned = raw_text.strip()
+        fixed = _clean_price_text(cleaned)
+        digits = re.sub(r"[^\d]", "", fixed)
+        if digits and len(digits) >= 4:
+            try:
+                return int(digits), 0.6
+            except ValueError:
+                pass
 
     return None, 0.0
 

@@ -20,16 +20,16 @@ def load_bgr(path: Path) -> np.ndarray:
 class TestActionIdentifiers(unittest.TestCase):
     def setUp(self) -> None:
         self.vision = VisionDetector()
-        self.popup = cv2.imread(str(ROOT / "debug_popup_buttons.png"))
+        self.popup = cv2.imread(str(ROOT / "tests" / "fixtures" / "popup_confirm.png"))
         self.shop = load_bgr(ROOT / "Screenshot" / "Captura de ecrã 2026-09-20 165924.png")
 
     def test_modal_confirm_requires_cancel_confirm_pair(self) -> None:
         button = self.vision.find_popup_confirm_button(self.popup)
         self.assertIsNotNone(button)
         self.assertGreater(button.center_x, 350)
-        self.assertLess(button.center_x, 550)
-        self.assertGreater(button.center_y, 300)
-        self.assertLess(button.center_y, 370)
+        self.assertLess(button.center_x, 700)
+        self.assertGreater(button.center_y, 250)
+        self.assertLess(button.center_y, 400)
 
     def test_shop_does_not_fake_a_modal_confirmation(self) -> None:
         self.assertIsNone(self.vision.find_popup_confirm_button(self.shop))

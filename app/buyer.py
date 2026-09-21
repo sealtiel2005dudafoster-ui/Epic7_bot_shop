@@ -241,21 +241,21 @@ class ShopBuyer:
             img_before = img  # Save for verification
             self._human_click(cx, cy)
 
-            # Step 4: Verify popup appeared
+            # Step 4: Verify popup appeared — retry with longer waits if needed
+            # ponytail: retry 3x com espera crescente; upgrade: polling visual continuo
             time.sleep(self.animation_wait_ms / 1000.0)
-            img_after = self._take_screenshot()
+            popup_found = False
+            for popup_try in range(1, 4):
+                img_after = self._take_screenshot()
+                if img_before is not None and img_after is not None:
+                    if self.vision.verify_purchase_popup_appeared(img_before, img_after):
+                        print(f"     ✅ Popup de compra CONFIRMADO (tentativa {attempt})")
+                        return ActionResult(True, "click_buy", "Popup confirmado visualmente", attempt - 1)
+                if popup_try < 3:
+                    time.sleep(0.5)
 
-            if img_before is not None and img_after is not None:
-                if self.vision.verify_purchase_popup_appeared(img_before, img_after):
-                    print(f"     ✅ Popup de compra CONFIRMADO (tentativa {attempt})")
-                    return ActionResult(True, "click_buy", "Popup confirmado visualmente", attempt - 1)
-                else:
-                    print(f"     ❌ Popup NÃO apareceu após clique (tentativa {attempt}/{self.MAX_RETRIES})")
-                    # Refresh screenshot for next attempt
-                    img = img_after
-            else:
-                # Can't verify, assume success
-                return ActionResult(True, "click_buy", "Sem verificação visual disponível", attempt - 1)
+            print(f"     ❌ Popup NÃO apareceu após clique (tentativa {attempt}/{self.MAX_RETRIES})")
+            img = img_after
 
         return ActionResult(False, "click_buy",
                             f"FALHOU: Popup não apareceu após {self.MAX_RETRIES} tentativas",
@@ -373,16 +373,18 @@ class ShopBuyer:
         self._human_click(rx, ry, hold_ms=100)
         time.sleep(self.animation_wait_ms / 1000.0)
 
-        # Verify refresh popup appeared
-        img_after = self._take_screenshot()
-        if img_before is not None and img_after is not None:
-            if self.vision.verify_purchase_popup_appeared(img_before, img_after):
-                print("     ✅ Popup de renovação DETECTADO")
-                return ActionResult(True, "click_refresh", "Popup de renovação apareceu")
-            else:
-                return ActionResult(False, "click_refresh", "Popup de renovação não foi identificado após o clique")
+        # Verify refresh popup appeared — retry with longer waits if needed
+        # ponytail: retry 3x com espera crescente; upgrade: polling visual continuo
+        for popup_attempt in range(1, 4):
+            img_after = self._take_screenshot()
+            if img_before is not None and img_after is not None:
+                if self.vision.verify_purchase_popup_appeared(img_before, img_after):
+                    print("     ✅ Popup de renovação DETECTADO")
+                    return ActionResult(True, "click_refresh", "Popup de renovação apareceu")
+            if popup_attempt < 3:
+                time.sleep(0.5)
 
-        return ActionResult(False, "click_refresh", "Popup de renovação não pôde ser verificado")
+        return ActionResult(False, "click_refresh", "Popup de renovação não foi identificado após 3 tentativas")
 
     def confirm_refresh_popup(
         self,
@@ -417,9 +419,11 @@ class ShopBuyer:
                     print(f"     🔍 Botão 'Confirmar' detectado em ({cx}, {cy})")
                 else:
                     print(f"     ⚠️  Modal de renovação não apresentou um par Cancelar/Confirmar verificável (tentativa {attempt}).")
+                    time.sleep(0.5)
                     continue
             else:
                 print("     ⚠️  Não foi possível capturar a janela durante a confirmação de renovação.")
+                time.sleep(0.5)
                 continue
 
             img_before = img
