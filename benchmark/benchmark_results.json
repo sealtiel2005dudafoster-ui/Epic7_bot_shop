@@ -1,0 +1,425 @@
+{
+  "dataset_summary": {
+    "screenshots_completas_gt": 1,
+    "crops_slots_gt": 4,
+    "pngs_em_disco": 5,
+    "gt_slots_validos": 8,
+    "friendship": 1,
+    "bookmarks": 1,
+    "mystic_medals": 1,
+    "ignorar": 5,
+    "disponivel_true": 6,
+    "disponivel_false": 2,
+    "arquivos": [
+      "Captura de ecrã 2026-09-20 165924.png",
+      "Captura de ecrã 2026-09-20 170046.png",
+      "Captura de ecrã 2026-09-20 183838.png",
+      "Captura de ecrã 2026-09-20 184513.png",
+      "Captura de ecrã 2026-09-20 190450.png"
+    ]
+  },
+  "ground_truth_files": 5,
+  "env": {
+    "windows": "Windows-11-10.0.22631-SP0",
+    "python": "3.14.2",
+    "cpu": "Intel64 Family 6 Model 42 Stepping 7, GenuineIntel",
+    "cpu_count": 2,
+    "ram_total_mb": 8082.5,
+    "opencv": "5.0.0",
+    "numpy": "2.5.3",
+    "pillow": "12.2.0",
+    "yaml": "6.0.3",
+    "psutil": "7.2.2",
+    "onnxruntime": "nao instalado"
+  },
+  "ocr_isolado": {
+    "price_exact": 0,
+    "price_wrong": 0,
+    "price_empty": 8,
+    "latency": {
+      "mean": 0.12366334999751416,
+      "p50": 0.12460860000282992,
+      "p95": 0.1515976500042598,
+      "min": 0.10180619999300689,
+      "max": 0.15416770000592805,
+      "ips": 8.086470243771512
+    },
+    "detalhe": [
+      {
+        "gt_price": null,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+        "slot": 1
+      },
+      {
+        "gt_price": null,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+        "slot": 2
+      },
+      {
+        "gt_price": null,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+        "slot": 3
+      },
+      {
+        "gt_price": null,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+        "slot": 4
+      },
+      {
+        "gt_price": 18000,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 183838.png",
+        "slot": 1
+      },
+      {
+        "gt_price": 184000,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 184513.png",
+        "slot": 1
+      },
+      {
+        "gt_price": 280000,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 190450.png",
+        "slot": 1
+      },
+      {
+        "gt_price": null,
+        "pred_price": null,
+        "file": "Screenshot/Captura de ecrã 2026-09-20 170046.png",
+        "slot": 1
+      }
+    ]
+  },
+  "robustez": [
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+      "slot": 1,
+      "normal": "ignorar",
+      "small_0.9x": "ignorar",
+      "stable": true
+    },
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+      "slot": 2,
+      "normal": "ignorar",
+      "small_0.9x": "ignorar",
+      "stable": true
+    },
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+      "slot": 3,
+      "normal": "ignorar",
+      "small_0.9x": "ignorar",
+      "stable": true
+    }
+  ],
+  "comparacao_arquitetura": {
+    "A_opencv": {
+      "descricao": "OpenCV/template matching atual (baseline)",
+      "resultado": 0.625
+    },
+    "B_ocr": {
+      "descricao": "Tesseract OCR isolado",
+      "price_exact": 0
+    },
+    "C_vlm": {
+      "descricao": "VLM local (avaliacao por cache/disco)",
+      "detalhe": "todos indisponiveis sem download - ver tabela"
+    },
+    "D_opencv_ocr": {
+      "descricao": "OpenCV + OCR (sistema atual)",
+      "epic_shop_accuracy": 0.625
+    },
+    "E_opencv_ocr_vlm": {
+      "descricao": "OpenCV+OCR+VLM validacao (proposto)",
+      "avaliacao": "nao justificado sem VLM <=800MB local e com ganho mensuravel"
+    }
+  },
+  "resultados": [
+    {
+      "name": "opencv_template",
+      "group": "baseline",
+      "latency": {
+        "mean": 0.12280692250151333,
+        "p50": 0.1220482000062475,
+        "p95": 0.13905536500969903,
+        "min": 0.10380099999019876,
+        "max": 0.15352059999713674,
+        "ips": 8.142863444751473,
+        "load_time": 0.0,
+        "ram_before_mb": 38.7,
+        "ram_warm_mb": 42.9,
+        "ram_peak_mb": 43.5,
+        "runs": 20,
+        "images_per_run": 8,
+        "total_inferences": 160
+      },
+      "f1_by_currency": {
+        "friendship": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "bookmarks": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "mystic_medals": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "ignorar": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "price": {
+        "exato": 0,
+        "incorreto": 0,
+        "vazio": 8,
+        "invalido": 0,
+        "acc": 0.0
+      },
+      "availability": {
+        "acc": 1.0,
+        "corretos": 8,
+        "total": 8
+      },
+      "epic_shop_accuracy": 0.625,
+      "moeda_f1_mean": 1.0,
+      "size_mb": 0.808,
+      "preds_detail": [
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+          "slot_gt": 1,
+          "currency_gt": "ignorar",
+          "price_gt": null,
+          "avail_gt": false,
+          "currency_pred": "ignorar",
+          "price_pred": null,
+          "avail_pred": false,
+          "conf": 0.8185344934463501,
+          "slot_pred": 1
+        },
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+          "slot_gt": 2,
+          "currency_gt": "ignorar",
+          "price_gt": null,
+          "avail_gt": true,
+          "currency_pred": "ignorar",
+          "price_pred": null,
+          "avail_pred": true,
+          "conf": 0.5621792674064636,
+          "slot_pred": 2
+        },
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+          "slot_gt": 3,
+          "currency_gt": "ignorar",
+          "price_gt": null,
+          "avail_gt": true,
+          "currency_pred": "ignorar",
+          "price_pred": null,
+          "avail_pred": true,
+          "conf": 0.5577945113182068,
+          "slot_pred": 3
+        },
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+          "slot_gt": 4,
+          "currency_gt": "ignorar",
+          "price_gt": null,
+          "avail_gt": true,
+          "currency_pred": "ignorar",
+          "price_pred": null,
+          "avail_pred": true,
+          "conf": 0.4620480239391327,
+          "slot_pred": 4
+        },
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 183838.png",
+          "slot_gt": 1,
+          "currency_gt": "friendship",
+          "price_gt": 18000,
+          "avail_gt": true,
+          "currency_pred": "friendship",
+          "price_pred": null,
+          "avail_pred": true,
+          "conf": 0.9999998211860657,
+          "slot_pred": 1
+        },
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 184513.png",
+          "slot_gt": 1,
+          "currency_gt": "bookmarks",
+          "price_gt": 184000,
+          "avail_gt": true,
+          "currency_pred": "bookmarks",
+          "price_pred": null,
+          "avail_pred": true,
+          "conf": 1.0,
+          "slot_pred": 1
+        },
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 190450.png",
+          "slot_gt": 1,
+          "currency_gt": "mystic_medals",
+          "price_gt": 280000,
+          "avail_gt": true,
+          "currency_pred": "mystic_medals",
+          "price_pred": null,
+          "avail_pred": true,
+          "conf": 1.0,
+          "slot_pred": 1
+        },
+        {
+          "file": "Screenshot/Captura de ecrã 2026-09-20 170046.png",
+          "slot_gt": 1,
+          "currency_gt": "ignorar",
+          "price_gt": null,
+          "avail_gt": false,
+          "currency_pred": "ignorar",
+          "price_pred": null,
+          "avail_pred": false,
+          "conf": 0.3776041567325592,
+          "slot_pred": 1
+        }
+      ]
+    },
+    {
+      "name": "yolo_onnx_action_detector",
+      "group": "yolo",
+      "status": "indisponivel",
+      "reason": "No module named 'onnxruntime'",
+      "avaliacao": "FORA DA CATEGORIA - sem .onnx treinado"
+    },
+    {
+      "name": "smolvlm-256m",
+      "group": "C",
+      "hf_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "status": "nao_cached",
+      "status_detail": "not_cached",
+      "formato_original": "FP16",
+      "tamanho_fp16_mb": 512,
+      "tamanho_int8_mb": 256,
+      "tamanho_int4_mb": 128,
+      "tamanho_cache_mb": 0,
+      "classificacao_estimada": "GRUPO B (100-400 MB)",
+      "classificacao": "GRUPO B (100-400 MB)",
+      "nota": "Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 512MB / INT8 256MB / INT4 128MB. Menor=128MB -> GRUPO B (100-400 MB). Verificacao de tamanho requerida."
+    },
+    {
+      "name": "smolvlm-500m",
+      "group": "B/C",
+      "hf_id": "HuggingFaceTB/SmolVLM-500M-Instruct",
+      "status": "nao_cached",
+      "status_detail": "not_cached",
+      "formato_original": "FP16",
+      "tamanho_fp16_mb": 1000,
+      "tamanho_int8_mb": 500,
+      "tamanho_int4_mb": 250,
+      "tamanho_cache_mb": 0,
+      "classificacao_estimada": "GRUPO B (100-400 MB)",
+      "classificacao": "GRUPO B (100-400 MB)",
+      "nota": "Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 1000MB / INT8 500MB / INT4 250MB. Menor=250MB -> GRUPO B (100-400 MB). Verificacao de tamanho requerida."
+    },
+    {
+      "name": "smolvlm2-256m",
+      "group": "C",
+      "hf_id": "HuggingFaceTB/SmolVLM2-256M-Video-Instruct",
+      "status": "nao_cached",
+      "status_detail": "not_cached",
+      "formato_original": "FP16",
+      "tamanho_fp16_mb": 512,
+      "tamanho_int8_mb": 256,
+      "tamanho_int4_mb": 128,
+      "tamanho_cache_mb": 0,
+      "classificacao_estimada": "GRUPO B (100-400 MB)",
+      "classificacao": "GRUPO B (100-400 MB)",
+      "nota": "Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 512MB / INT8 256MB / INT4 128MB. Menor=128MB -> GRUPO B (100-400 MB). Verificacao de tamanho requerida."
+    },
+    {
+      "name": "smolvlm2-500m",
+      "group": "B/C",
+      "hf_id": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+      "status": "nao_cached",
+      "status_detail": "not_cached",
+      "formato_original": "FP16",
+      "tamanho_fp16_mb": 1000,
+      "tamanho_int8_mb": 500,
+      "tamanho_int4_mb": 250,
+      "tamanho_cache_mb": 0,
+      "classificacao_estimada": "GRUPO B (100-400 MB)",
+      "classificacao": "GRUPO B (100-400 MB)",
+      "nota": "Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 1000MB / INT8 500MB / INT4 250MB. Menor=250MB -> GRUPO B (100-400 MB). Verificacao de tamanho requerida."
+    },
+    {
+      "name": "internvl2-1b",
+      "group": "C",
+      "hf_id": "OpenGVLab/InternVL2-1B",
+      "status": "nao_cached",
+      "status_detail": "not_cached",
+      "formato_original": "FP16",
+      "tamanho_fp16_mb": 2000,
+      "tamanho_int8_mb": 1000,
+      "tamanho_int4_mb": 500,
+      "tamanho_cache_mb": 0,
+      "classificacao_estimada": "GRUPO C (400-800 MB)",
+      "classificacao": "GRUPO C (400-800 MB)",
+      "nota": "Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 2000MB / INT8 1000MB / INT4 500MB. Menor=500MB -> GRUPO C (400-800 MB). Verificacao de tamanho requerida."
+    },
+    {
+      "name": "internvl2_5-1b",
+      "group": "C",
+      "hf_id": "OpenGVLab/InternVL2_5-1B",
+      "status": "nao_cached",
+      "status_detail": "not_cached",
+      "formato_original": "FP16",
+      "tamanho_fp16_mb": 2000,
+      "tamanho_int8_mb": 1000,
+      "tamanho_int4_mb": 500,
+      "tamanho_cache_mb": 0,
+      "classificacao_estimada": "GRUPO C (400-800 MB)",
+      "classificacao": "GRUPO C (400-800 MB)",
+      "nota": "Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 2000MB / INT8 1000MB / INT4 500MB. Menor=500MB -> GRUPO C (400-800 MB). Verificacao de tamanho requerida."
+    },
+    {
+      "name": "tinylava-1.5b",
+      "group": "FORA",
+      "hf_id": "bczhou/TinyLLaVA-3.1B",
+      "status": "nao_cached",
+      "status_detail": "not_cached",
+      "formato_original": "FP16",
+      "tamanho_fp16_mb": 6200,
+      "tamanho_int8_mb": 3100,
+      "tamanho_int4_mb": 1550,
+      "tamanho_cache_mb": 0,
+      "classificacao_estimada": "FORA DA CATEGORIA (>800 MB)",
+      "classificacao": "FORA DA CATEGORIA",
+      "nota": "Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 6200MB / INT8 3100MB / INT4 1550MB. Menor=1550MB -> FORA DA CATEGORIA (>800 MB). Verificacao de tamanho requerida."
+    }
+  ],
+  "warmup": 2,
+  "runs": 20
+}

@@ -1,0 +1,10 @@
+Modelo,Tamanho_MB,RAM_pico_MB,Load_s,Inferencia_media_ms,P50_ms,P95_ms,IPS,Moeda_F1_mean,Preco_Acc,Disp_Acc,Shop_Accuracy,Grupo,Status
+opencv_template,0.808,43.5,0.0,122.8,122.0,139.1,8.14,1.0,0.0,1.0,0.625,baseline,ok
+yolo_onnx_action_detector,,,,,,,,,,,,yolo,indisponivel
+smolvlm-256m,,,,,,,,,,,,C,nao_cached
+smolvlm-500m,,,,,,,,,,,,B/C,nao_cached
+smolvlm2-256m,,,,,,,,,,,,C,nao_cached
+smolvlm2-500m,,,,,,,,,,,,B/C,nao_cached
+internvl2-1b,,,,,,,,,,,,C,nao_cached
+internvl2_5-1b,,,,,,,,,,,,C,nao_cached
+tinylava-1.5b,,,,,,,,,,,,FORA,nao_cached

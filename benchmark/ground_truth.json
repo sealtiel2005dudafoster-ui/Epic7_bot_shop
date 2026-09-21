@@ -1,0 +1,38 @@
+{
+  "_notes": "GT manual. Precos tipicos Epic7: friendship 18000, bookmarks 184000, mystic 280000. 165924 = shop completo sem moedas relevantes nos slots visiveis (todos ignorar). Crops = slot unico com moeda especifica.",
+  "images": [
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 165924.png",
+      "type": "full_shop",
+      "resolution": [742,474],
+      "slots": [
+        {"slot":1,"currency":"ignorar","price":null,"available":false,"confidence":1.0},
+        {"slot":2,"currency":"ignorar","price":null,"available":true,"confidence":1.0},
+        {"slot":3,"currency":"ignorar","price":null,"available":true,"confidence":1.0},
+        {"slot":4,"currency":"ignorar","price":null,"available":true,"confidence":1.0},
+        {"slot":5,"currency":null,"price":null,"available":null,"confidence":0,"note":"truncado - excluir da metrica"},
+        {"slot":6,"currency":null,"price":null,"available":null,"confidence":0,"note":"fora da viewport - excluir"}
+      ]
+    },
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 183838.png",
+      "type": "crop_slot",
+      "slots": [{"slot":1,"currency":"friendship","price":18000,"available":true,"confidence":1.0}]
+    },
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 184513.png",
+      "type": "crop_slot",
+      "slots": [{"slot":1,"currency":"bookmarks","price":184000,"available":true,"confidence":1.0}]
+    },
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 190450.png",
+      "type": "crop_slot",
+      "slots": [{"slot":1,"currency":"mystic_medals","price":280000,"available":true,"confidence":1.0}]
+    },
+    {
+      "file": "Screenshot/Captura de ecrã 2026-09-20 170046.png",
+      "type": "crop_slot",
+      "slots": [{"slot":1,"currency":"ignorar","price":null,"available":false,"confidence":1.0,"note":"equipamento/heroi - deve ignorar"}]
+    }
+  ]
+}
