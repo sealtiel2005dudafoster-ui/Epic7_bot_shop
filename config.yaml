@@ -1,0 +1,56 @@
+# =============================================================================
+# Epic Seven Secret Shop Bot — Configuration
+# =============================================================================
+
+# --- Safe/Execution Modes ---
+DRY_RUN: true          # When true: scan only, no clicks, no purchases
+AUTOBUY_ENABLED: false # Master switch for purchase automation (Phase 5)
+
+# --- Purchase Decision Engine ---
+BUY_FRIENDSHIP: true
+BUY_BOOKMARKS: true
+BUY_MYSTIC_MEDALS: true
+
+# Maximum price thresholds (gold) — items above these prices are skipped
+MAX_FRIENDSHIP_PRICE: 18000
+MAX_BOOKMARK_PRICE: 184000
+MAX_MYSTIC_PRICE: 280000
+
+# --- Detection Thresholds ---
+# Minimum template-match confidence to accept a coin detection.
+CONFIDENCE_THRESHOLD: 0.72
+
+# Minimum confidence required to trigger a purchase.
+PURCHASE_CONFIDENCE_MIN: 0.72
+
+# --- Scroll Behavior (for 6th slot detection) ---
+SCROLL_ATTEMPTS_MAX: 5       # Max scroll-and-verify attempts
+SCROLL_AMOUNT: 300           # Pixels to scroll per attempt (pyautogui wheel)
+SCROLL_VERIFY_WAIT_MS: 500   # Time to wait after scroll before re-checking
+
+# --- Window Detection ---
+# Title fragment that must appear in the target window's title bar.
+WINDOW_TITLE_KEYWORD: "Epic Seven"
+
+# --- OCR ---
+# Tesseract executable path (Windows). Override if needed.
+TESSERACT_CMD: "tesseract"
+
+# --  -- Resolution tolerance --  --
+# Allowed deviation in width/height before triggering "resolution changed" stop.
+RESOLUTION_TOLERANCE_PX: 10
+
+# --- Timing ---
+CLICK_COOLDOWN_MS: 500        # Prevent double-click on the same slot
+ANIMATION_WAIT_MS: 800        # Wait for purchase animation to settle
+
+# --- Optional local vision model ---
+# Leave disabled until a custom Epic Seven model has been copied to models/vision.
+# The bot uses conservative visual identifiers while this is false.
+VISUAL_AI:
+  ENABLED: false
+  BACKEND: yolo_onnx
+  MODEL_PATH: models/vision/yolo11n-epic7-actions.onnx
+  LABELS_PATH: models/vision/labels.txt
+  MIN_CONFIDENCE: 0.92
+  INPUT_SIZE: 640
