@@ -61,31 +61,63 @@ class OpenCVAdapter:
             cur=normalize_currency(det.tipo)
             return PredSlot(slot=slot_index,currency=cur,price=det.preco,available=det.disponivel,confidence=float(det.confianca))
 
-# ---------- Dummy OCR adapter for tesseract workaround ----------
+# ---------- Tesseract OCR adapter via pytesseract ----------
+import os
+_TESSERACT_CANDIDATES = [
+    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+    "/c/Program Files/Tesseract-OCR/tesseract.exe",
+]
+def _find_tesseract():
+    import shutil
+    exe = shutil.which("tesseract")
+    if exe:
+        return exe
+    for c in _TESSERACT_CANDIDATES:
+        if os.path.isfile(c):
+            return c
+    return None
+
 class TesseractAdapter:
     name="tesseract_price_only"
     group="ocr"
-    def load(self): return 0.0
-    def infer_price(self, image_path: str|Path):
-        img=load_bgr(image_path)
+    def __init__(self):
+        self._exe = _find_tesseract()
+    def load(self):
         try:
-            from app.ocr import extract_price_with_confidence
-            from app.slots import ShopLayout, SlotRegion
-            # detect layout to get price ROI
-            if "165924" in str(image_path):
-                layout=ShopLayout(templates_dir=ROOT/"templates")
-                layout.adjust_for_resolution(img)
-                slot=layout.slots[0]
-                roi=slot.get_price_roi(img)
-            else:
-                h,w=img.shape[:2]
-                roi=img[0:int(h*0.5), int(w*0.55):w]
-            if roi is None or roi.size==0:
-                return None,0
-            price,conf=extract_price_with_confidence(roi)
-            return price,conf
+            import pytesseract
+            if self._exe:
+                pytesseract.pytesseract.tesseract_cmd = self._exe
+            # test: does tesseract respond?
+            pytesseract.get_tesseract_version()
+            return 0.0
+        except Exception as e:
+            raise RuntimeError(f"Tesseract not usable: {e}")
+    def infer_price(self, image_path: str|Path):
+        """Read price from image ROI via pytesseract. Returns (price:int|None, confidence:float).
+        ponytail: upscale 3x + PSM6 + regex. Upgrade: tunning por resolucao/cor do slot.
+        """
+        try:
+            import pytesseract, cv2
+            if self._exe:
+                pytesseract.pytesseract.tesseract_cmd = self._exe
+            img = load_bgr(image_path)
+            h, w = img.shape[:2]
+            # upscale 3x for small crops (80px high)
+            big = cv2.resize(img, (w*3, h*3), interpolation=cv2.INTER_CUBIC)
+            gray = cv2.cvtColor(big, cv2.COLOR_BGR2GRAY)
+            # PSM 6: uniform block of text; no whitelist — allows full parsing
+            raw = pytesseract.image_to_string(gray, config="--psm 6")
+            # extract number with thousand separator: 18.000 or 18,000
+            import re
+            m = re.search(r'(\d{1,3}(?:[.,]\d{3})+)', raw)
+            if not m:
+                return None, 0.0
+            price = int(m.group(1).replace('.', '').replace(',', ''))
+            conf = 0.85 if len(str(price)) >= 3 else 0.5
+            return price, conf
         except Exception:
-            return None,0
+            return None, 0.0
 
 # ---------- ONNX placeholder - avalia se onnxruntime + modelo existir ----------
 class ONNXAdapter:

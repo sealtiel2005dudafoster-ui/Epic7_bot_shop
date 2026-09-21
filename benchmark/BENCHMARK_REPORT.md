@@ -60,20 +60,15 @@
 
 - **tinylava-1.5b**: nao_cached  Sem cache local. Nao baixar automaticamente. Tamanhos: FP16 6200MB / INT8 3100MB / INT4 1550MB. Menor=1550MB -> FORA DA CATEGORIA (>800 MB). Verificacao de tamanho requerida. class=FORA DA CATEGORIA tam=?
 
-## Teste especifico de OCR (preco)
+## Teste especifico de OCR (preco) — ATUALIZADO 2026-09-21
 
-- Tesseract isolado: exact=0 wrong=0 empty=8  lat mean 123.7 ms  p95 151.6 ms
+- Tesseract 5.4.0 + pytesseract + upscale 3x + PSM6: price_exact=2/3  wrong=0  empty=1  FP=1
+  - friendship 18000: pred=18000 OK  (~500ms)
+  - bookmarks 184000: pred=184000 OK (~466ms)
+  - mystic 280000: pred=null ERRO — crop nao inclui regiao de preco (problema do dataset, nao do OCR)
+  - ignorar: pred=29957 FALSE POSITIVE — crop ignorar e screenshot full shop com porcentagens; excluir do metrica de preco
 - PP-OCRv6 / latin_PP-OCRv5_mobile_rec: nao instalado localmente -> registrar como FORA DA CATEGORIA ate baixar e medir. Tamanho esperado ~15-80 MB (Grupo A). Nao comparar diretamente com VLM.
 - OCR interno de VLMs: indisponivel (VLMs nao cached, sem inferencia). Quando disponivel, medir na mesma price ROI e registrar erros por valor (18k/184k/280k).
-- Onde Tesseract errou:
-  - Captura de ecrã 2026-09-20 165924.png slot 1: GT None -> pred None [OK]
-  - Captura de ecrã 2026-09-20 165924.png slot 2: GT None -> pred None [OK]
-  - Captura de ecrã 2026-09-20 165924.png slot 3: GT None -> pred None [OK]
-  - Captura de ecrã 2026-09-20 165924.png slot 4: GT None -> pred None [OK]
-  - Captura de ecrã 2026-09-20 183838.png slot 1: GT 18000 -> pred None [ERRO]
-  - Captura de ecrã 2026-09-20 184513.png slot 1: GT 184000 -> pred None [ERRO]
-  - Captura de ecrã 2026-09-20 190450.png slot 1: GT 280000 -> pred None [ERRO]
-  - Captura de ecrã 2026-09-20 170046.png slot 1: GT None -> pred None [OK]
 
 ## Robustez (secondary visual validator)
 
@@ -84,9 +79,9 @@
 ## Comparacao com sistema atual (Sec 9)
 
 - **A_opencv** OpenCV/template matching atual (baseline): {"descricao": "OpenCV/template matching atual (baseline)", "resultado": 0.625}
-- **B_ocr** Tesseract OCR isolado: {"descricao": "Tesseract OCR isolado", "price_exact": 0}
+- **B_ocr** Tesseract OCR isolado (ATUALIZADO 2026-09-21): {"descricao": "Tesseract 5.4.0 + 3x upscale + PSM6", "price_exact": 2, "price_wrong": 0, "price_empty": 1, "false_positives": 1, "latency_ms_mean": 495.7, "detalhe": "2/3 precos corretos (18000, 184000). mystic crop nao tem regiao de preco; ignorar crop e FP por porcentagens."}
 - **C_vlm** VLM local (avaliacao por cache/disco): {"descricao": "VLM local (avaliacao por cache/disco)", "detalhe": "todos indisponiveis sem download - ver tabela"}
-- **D_opencv_ocr** OpenCV + OCR (sistema atual): {"descricao": "OpenCV + OCR (sistema atual)", "epic_shop_accuracy": 0.625}
+- **D_opencv_ocr** OpenCV + OCR (sistema atual): {"descricao": "OpenCV + OCR (sistema atual)", "epic_shop_accuracy": 0.625, "ocr": {"price_exact": 2, "price_empty": 1, "FP": 1}}
 - **E_opencv_ocr_vlm** OpenCV+OCR+VLM validacao (proposto): {"descricao": "OpenCV+OCR+VLM validacao (proposto)", "avaliacao": "nao justificado sem VLM <=800MB local e com ganho mensuravel"}
 
 ## Metricas individuais (nao escondidas)
