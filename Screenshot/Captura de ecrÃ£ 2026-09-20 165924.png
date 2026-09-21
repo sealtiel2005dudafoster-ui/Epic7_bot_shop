@@ -1,0 +1,18 @@
+commit 6ce4050fb9670c80191e03facf68d74ee45e258e
+Author: sealtiel2005dudafoster-ui <sealtiel2005dudafoster@gmail.com>
+Date:   Mon Sep 21 14:06:36 2026 +0100
+
+    app: restore o bot completo da loja secreta (plano de trabalho orfao)
+    
+    Recuperado da arvore dangling bd81014 - trabalho nao-commitado
+    que existia antes da branch do benchmark. Contem app/ (slots,
+    detector, vision, buyer, safety, ocr, templates, capture, scanner,
+    action_identifier), main.py, config.yaml, templates/*.png, tests/
+    requirements.txt e screenshots.
+    
+    Co-Authored-By: Claude Code <noreply@anthropic.com>
+
+diff --git "a/Screenshot/Captura de ecr\303\243 2026-09-20 165924.png" "b/Screenshot/Captura de ecr\303\243 2026-09-20 165924.png"
+new file mode 100644
+index 0000000..e7a3ff7
+Binary files /dev/null and "b/Screenshot/Captura de ecr\303\243 2026-09-20 165924.png" differ

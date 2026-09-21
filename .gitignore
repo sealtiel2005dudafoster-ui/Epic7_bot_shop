@@ -1,4 +1,13 @@
-
 # benchmark tmp (gerado)
 benchmark/tmp/
 benchmark/src/__pycache__/
+
+# pycache everywhere
+**/__pycache__/
+__pycache__/
+
+# debug images (não versionar)
+debug_*.png
+
+# debug images (não versionar)
+debug_*.png
