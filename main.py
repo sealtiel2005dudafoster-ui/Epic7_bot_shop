@@ -76,6 +76,14 @@ class ShopBot:
         )
         self.buyer = ShopBuyer(config=self.config, dry_run=self.is_dry_run)
         self.buyer.set_capture(self.capture)  # Inject capture for verification screenshots
+        if config.get("VISUAL_AI", {}).get("ENABLED", False):
+            if self.buyer.actions.backend_error:
+                print(f"[!] VISUAL_AI avisou: {self.buyer.actions.backend_error}")
+                print(f"    O modelo deve estar em '{config.get('VISUAL_AI', {}).get('MODEL_PATH')}'.")
+                print(f"    Copie o modelo e labels para essa pasta, ou ponha VISUAL_AI.ENABLED: false.")
+                print(f"    A deteção visual conservadora continua ativa.")
+            else:
+                print(f"[✓] VISUAL_AI ativo: backend {config.get('VISUAL_AI', {}).get('BACKEND')} carregado.")
         self.scanner = ShopScanner(
             capture=self.capture,
             detector=self.detector,

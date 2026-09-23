@@ -14,6 +14,7 @@ solving the root cause of missed clicks.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import cv2
@@ -300,108 +301,108 @@ class VisionDetector:
 
         return dark_corners >= 3  # At least 3 of 4 corners are dark
 
-    def find_popup_confirm_button(self, img: np.ndarray) -> Optional[DetectedButton]:
-        """Find a modal confirmation through its *button pair*, never its position.
+    def find_refresh_confirm_button(self, img: np.ndarray) -> Optional[DetectedButton]:
+        """Locate the blue 'Confirmar' button in the shop-refresh modal.
 
-        Both the purchase and the shop-refresh dialogs render a brown cancel
-        button immediately to the left of a green confirmation button.  Shop
-        buttons elsewhere do not have that paired sibling.  This prevents a
-        ``Comprar`` template in the darkened shop background from being
-        mistaken for the refresh dialog's ``Confirmar`` button.
-
-        ``None`` means that no verified modal action exists.  Callers must not
-        click a calculated fallback in that case.
+        Uses the real template 'templates/popup_refresh_confirm_button.png' first.
+        If unavailable or confidence is low, falls back to finding the brown 'Cancelar'
+        sibling and measuring the blue button width to its right.
         """
-        green_buttons = self.find_green_buttons(img)
-        blue_buttons = self.find_blue_buttons(img)
-        brown_buttons = self.find_brown_buttons(img)
+        template_path = Path("templates/popup_refresh_confirm_button.png")
+        if template_path.exists():
+            tpl = cv2.imread(str(template_path))
+            if tpl is not None:
+                matched = self._match_template(img, tpl, min_confidence=0.75)
+                if matched is not None:
+                    return matched
 
-        candidates: List[Tuple[float, DetectedButton]] = []
-        for confirm in green_buttons + blue_buttons:
+        # Color/sibling fallback:
+        brown_buttons = self.find_brown_buttons(img)
+        blue_buttons = self.find_blue_buttons(img)
+        for confirm in blue_buttons:
             for brown in brown_buttons:
-                # Cancel must be left of confirm, on the same visual row, and
-                # have a comparable height.  All measures are relative to the
-                # detected controls, not to the window or screen.
                 vertical_delta = abs(confirm.center_y - brown.center_y)
                 max_height = max(confirm.height, brown.height)
                 horizontal_gap = confirm.x0 - brown.x1
                 comparable_height = 0.55 <= brown.height / max(confirm.height, 1) <= 1.6
                 if (
-                    brown.x1 > confirm.x0
-                    or vertical_delta > max_height * 0.50
-                    or horizontal_gap > max(confirm.width, brown.width) * 1.5
-                    or not comparable_height
+                    brown.x1 <= confirm.x0
+                    and vertical_delta <= max_height * 0.50
+                    and horizontal_gap <= max(confirm.width, brown.width) * 1.5
+                    and comparable_height
                 ):
-                    continue
+                    return confirm
 
-                # Prefer a tightly aligned pair with substantial visual area.
-                score = confirm.area + brown.area - horizontal_gap * 4 - vertical_delta * 20
-                candidates.append((score, confirm))
-
-        # --- fallback: blue confirm merges with dialog background, so
-        # find_green_buttons + find_blue_buttons can't isolate it.
-        # Anchor on the brown cancel and look for blue density to its right.
-        if not candidates and brown_buttons:
+        # Band fallback right of Cancelar with proper button width limit:
+        if brown_buttons:
             hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             blue_mask = cv2.inRange(hsv, self.BLUE_HSV_LOWER, self.BLUE_HSV_UPPER)
             img_h, img_w = img.shape[:2]
-
             for brown in brown_buttons:
-                # Scan the band to the right of cancel, same row.
                 rx0 = brown.x1
                 ry0 = max(0, brown.y0 - brown.height // 2)
                 ry1 = min(img_h, brown.y1 + brown.height // 2)
                 if rx0 >= img_w or ry1 <= ry0:
                     continue
-                band = blue_mask[ry0:ry1, rx0:]
+                # Expected button width is approximately equal to Cancelar width (~110px)
+                expected_w = int(brown.width * 1.3)
+                rx1 = min(img_w, rx0 + expected_w)
+                band = blue_mask[ry0:ry1, rx0:rx1]
                 density = cv2.countNonZero(band) / max(band.size, 1)
-                if density < 0.15:
-                    continue
+                if density >= 0.20:
+                    col_density = np.count_nonzero(band, axis=0) / max(band.shape[0], 1)
+                    blue_cols = np.where(col_density > 0.20)[0]
+                    if len(blue_cols) >= 15:
+                        bx0 = rx0 + int(blue_cols[0])
+                        bx1 = rx0 + int(blue_cols[-1]) + 1
+                        by0 = brown.y0
+                        by1 = brown.y1
+                        return DetectedButton(
+                            center_x=(bx0 + bx1) // 2,
+                            center_y=(by0 + by1) // 2,
+                            x0=bx0, y0=by0, x1=bx1, y1=by1,
+                            area=(bx1 - bx0) * (by1 - by0),
+                            color="blue",
+                        )
+        return None
 
-                # Find horizontal extent of blue in the band.
-                col_density = np.count_nonzero(band, axis=0) / max(band.shape[0], 1)
-                blue_cols = np.where(col_density > 0.20)[0]
-                if len(blue_cols) < 10:
-                    continue
+    def find_purchase_confirm_button(self, img: np.ndarray) -> Optional[DetectedButton]:
+        """Locate the green 'Comprar' button in the item-purchase modal.
 
-                bx0 = rx0 + int(blue_cols[0])
-                bx1 = rx0 + int(blue_cols[-1]) + 1
-                by0 = brown.y0 - brown.height // 4
-                by1 = brown.y1 + brown.height // 4
-                bw = bx1 - bx0
-                bh = by1 - by0
-                if bw < 40 or bw > img_w * 0.6 or bh < 10:
-                    continue
+        Uses the real template 'templates/popup_buy_button.png' first.
+        If unavailable, falls back to Cancelar sibling pair detection.
+        """
+        template_path = Path("templates/popup_buy_button.png")
+        if template_path.exists():
+            tpl = cv2.imread(str(template_path))
+            if tpl is not None:
+                matched = self._match_template(img, tpl, min_confidence=0.75)
+                if matched is not None:
+                    return matched
 
-                # Verify the blue is an adjacent confirm button, not scattered
-                # shop pixels.  Sample density in a tight window (one cancel-
-                # width) immediately right of cancel — a real button floods
-                # that zone; shop blue is sparse.
-                window_w = brown.width
-                wx0 = brown.x1
-                wx1 = min(img_w, wx0 + window_w)
-                wy0 = max(0, brown.y0)
-                wy1 = min(img_h, brown.y1)
-                if wx1 <= wx0 or wy1 <= wy0:
-                    continue
-                adj_band = blue_mask[wy0:wy1, wx0:wx1]
-                adj_density = cv2.countNonZero(adj_band) / max(adj_band.size, 1)
-                if adj_density < 0.25:
-                    continue
-                if bw < brown.width * 0.8:
-                    continue
+        green_buttons = self.find_green_buttons(img)
+        brown_buttons = self.find_brown_buttons(img)
+        for confirm in green_buttons:
+            for brown in brown_buttons:
+                vertical_delta = abs(confirm.center_y - brown.center_y)
+                max_height = max(confirm.height, brown.height)
+                horizontal_gap = confirm.x0 - brown.x1
+                comparable_height = 0.55 <= brown.height / max(confirm.height, 1) <= 1.6
+                if (
+                    brown.x1 <= confirm.x0
+                    and vertical_delta <= max_height * 0.50
+                    and horizontal_gap <= max(confirm.width, brown.width) * 1.5
+                    and comparable_height
+                ):
+                    return confirm
+        return None
 
-                score = density * bw * bh
-                candidates.append((score, DetectedButton(
-                    center_x=(bx0 + bx1) // 2,
-                    center_y=(by0 + by1) // 2,
-                    x0=bx0, y0=by0, x1=bx1, y1=by1,
-                    area=bw * bh, color="blue",
-                )))
-
-        if not candidates:
-            return None
-        return max(candidates, key=lambda item: item[0])[1]
+    def find_popup_confirm_button(self, img: np.ndarray) -> Optional[DetectedButton]:
+        """Find a modal confirmation button (either purchase or refresh)."""
+        refresh_btn = self.find_refresh_confirm_button(img)
+        if refresh_btn is not None:
+            return refresh_btn
+        return self.find_purchase_confirm_button(img)
 
     def find_refresh_button(self, img: np.ndarray) -> Optional[DetectedButton]:
         """Locate ``Renovar`` through its own visual identifier.

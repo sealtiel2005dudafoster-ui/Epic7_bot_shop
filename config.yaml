@@ -52,5 +52,5 @@ VISUAL_AI:
   BACKEND: yolo_onnx
   MODEL_PATH: models/vision/yolo11n-epic7-actions.onnx
   LABELS_PATH: models/vision/labels.txt
-  MIN_CONFIDENCE: 0.92
+  MIN_CONFIDENCE: 0.90
   INPUT_SIZE: 640

@@ -49,8 +49,10 @@ class ActionIdentifier:
 
         if action is ActionClass.REFRESH_BUTTON:
             return self.vision.find_refresh_button(image)
-        if action in {ActionClass.PURCHASE_CONFIRM_BUTTON, ActionClass.REFRESH_CONFIRM_BUTTON}:
-            return self.vision.find_popup_confirm_button(image)
+        if action is ActionClass.PURCHASE_CONFIRM_BUTTON:
+            return self.vision.find_purchase_confirm_button(image)
+        if action is ActionClass.REFRESH_CONFIRM_BUTTON:
+            return self.vision.find_refresh_confirm_button(image)
         return None
 
     def _best_model_hit(self, image: np.ndarray, action: ActionClass) -> Optional[DetectedButton]:
